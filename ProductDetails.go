@@ -110,5 +110,27 @@ func (c *ProductDetailsContract) UpdateProductState(ctx contractapi.TransactionC
 		return fmt.Errorf("failed to marshal product JSON: %v", err)
 	}
 
+	err = ctx.GetStub().PutState(fmt.Sprintf("PRODUCT-%d", productID), productBytes)
+	if err != nil {
+		return fmt.Errorf("failed to put updated product state on the ledger: %v", err)
+	}
+
+	return nil
+}
+
+// LogProductMovement logs the movement of a product
+func (c *ProductDetailsContract) LogProductMovement(ctx contractapi.TransactionContextInterface, productID uint64, newLocation string) error {
+	product, err := c.RetrieveProductDetails(ctx, productID)
+	if err != nil {
+		return err
+	}
+
+	productHistory := ProductHistory{
+		Timestamp: uint64(ctx.GetStub().GetTxTimestamp().GetSeconds()),
+		Action:    "Movement",
+		Location:  newLocation,
+		State:     product.State,
+	}
+
 }
 
