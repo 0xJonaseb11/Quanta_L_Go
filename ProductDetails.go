@@ -132,5 +132,17 @@ func (c *ProductDetailsContract) LogProductMovement(ctx contractapi.TransactionC
 		State:     product.State,
 	}
 
+	historyKey := fmt.Sprintf("PRODUCT-%d-HISTORY", productID)
+	existingHistoryBytes, err := ctx.GetStub().GetState(historyKey)
+	if err != nil {
+		return fmt.Errorf("failed to read product history from the ledger: %v", err)
+	}
+
+	var productHistories []ProductHistory
+	if existingHistoryBytes != nil {
+		err = json.Unmarshal(existingHistoryBytes, &productHistories)
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal product history JSON: %v", err);
+
 }
 
