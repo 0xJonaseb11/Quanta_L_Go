@@ -10,7 +10,10 @@ type ProductDetailsContract struct {
 	contractapi.Contract
 }
 
-// Product represents the product details
+/*
+*@dev Product() represents the product details
+*/
+
 type Product struct {
 	ID              uint64 `json:"id"`
 	Name            string `json:"name"`
@@ -19,7 +22,10 @@ type Product struct {
 	BatchNumber     string `json:"batchNumber"`
 }
 
-// ProductHistory represents the history of a product
+/*
+*@dev ProductHistory() represents the history of a product
+*/
+
 type ProductHistory struct {
 	Timestamp uint64        `json:"timestamp"`
 	Action    string        `json:"action"`
@@ -27,7 +33,10 @@ type ProductHistory struct {
 	State     ProductState `json:"state"`
 }
 
-// ProductState represents the state of a product
+/*
+*@dev ProductState() represents the state of a product
+*/
+
 type ProductState int
 
 const (
@@ -43,13 +52,19 @@ const (
 	PUBLISHING
 )
 
-// Init initializes the chaincode
+/*
+@dev Init() initializes the chaincode
+*/
+
 func (c *ProductDetailsContract) Init(ctx contractapi.TransactionContextInterface) error {
-	// Initialization logic goes here
+	// Initialization later
 	return nil
 }
 
-// AddProduct adds a new product
+/*
+*@dev AddProduct() adds a new product
+*/
+
 func (c *ProductDetailsContract) AddProduct(ctx contractapi.TransactionContextInterface, name string, description string, manufacturedDate uint64, batchNumber string) error {
 	nextProductID, err := c.generateNextProductID(ctx)
 	if err != nil {
@@ -73,7 +88,7 @@ func (c *ProductDetailsContract) AddProduct(ctx contractapi.TransactionContextIn
 
 }
 
-// RetrieveProductDetails retrieves the details of a product
+// RetrieveProductDetails() retrieves the details of a product
 func (c *ProductDetailsContract) RetrieveProductDetails(ctx contractapi.TransactionContextInterface, productID uint64) (*Product, error) {
 	productBytes, err := ctx.GetStub().GetState(fmt.Sprintf("PRODUCT-%d", productID))
 	if err != nil {
@@ -92,7 +107,7 @@ func (c *ProductDetailsContract) RetrieveProductDetails(ctx contractapi.Transact
 	return product, nil
 }
 
-// UpdateProductState updates the state of a product
+// UpdateProductState() updates the state of a product
 func (c *ProductDetailsContract) UpdateProductState(ctx contractapi.TransactionContextInterface, productID uint64, currentState ProductState) error {
 	product, err := c.RetrieveProductDetails(ctx, productID)
 	if err != nil {
