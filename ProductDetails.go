@@ -91,4 +91,24 @@ func (c *ProductDetailsContract) RetrieveProductDetails(ctx contractapi.Transact
 
 	return product, nil
 }
+
+// UpdateProductState updates the state of a product
+func (c *ProductDetailsContract) UpdateProductState(ctx contractapi.TransactionContextInterface, productID uint64, currentState ProductState) error {
+	product, err := c.RetrieveProductDetails(ctx, productID)
+	if err != nil {
+		return err
+	}
+
+	// check for valid state transitions
+	if product.State == PRODUCT_REGISTERED && currentState != PRODUCT_TRANSIT {
+		return fmt.Errorf("invalid state transition")
+	}
+
+	product.State = currentState
+	productBytes, err := json.Marshal(product)
+	if err != nil {
+		return fmt.Errorf("failed to marshal product JSON: %v", err)
+	}
+
 }
+
