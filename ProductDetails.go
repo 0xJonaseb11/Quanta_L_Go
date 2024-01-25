@@ -42,3 +42,34 @@ const (
 	VALIDATING
 	PUBLISHING
 )
+
+// Init initializes the chaincode
+func (c *ProductDetailsContract) Init(ctx contractapi.TransactionContextInterface) error {
+	// Initialization logic goes here
+	return nil
+}
+
+// AddProduct adds a new product
+func (c *ProductDetailsContract) AddProduct(ctx contractapi.TransactionContextInterface, name string, description string, manufacturedDate uint64, batchNumber string) error {
+	nextProductID, err := c.generateNextProductID(ctx)
+	if err != nil {
+		return err
+	}
+
+	product := Product{
+		ID:              nextProductID,
+		Name:            name,
+		Description:     description,
+		ManufactureDate: manufacturedDate,
+		BatchNumber:     batchNumber,
+	}
+
+	err = ctx.GetStub().PutState(fmt.Sprintf("PRODUCT-%d", nextProductID), []byte(product))
+	if err != nil {
+		return fmt.Errorf("failed to put product on the ledger: %v", err)
+	}
+
+	return nil
+
+	
+}
