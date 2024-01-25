@@ -1,9 +1,11 @@
-package main
+package main;
 
 import (
 	"fmt"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
+
+	"encoding/json"
 )
 
 type ProductDetailsContract struct {
@@ -20,6 +22,7 @@ type Product struct {
 	Description     string `json:"description"`
 	ManufactureDate uint64 `json:"manufactureDate"`
 	BatchNumber     string `json:"batchNumber"`
+	State ProductState `json:"state"`
 }
 
 /**
@@ -79,7 +82,7 @@ func (c *ProductDetailsContract) AddProduct(ctx contractapi.TransactionContextIn
 		BatchNumber:     batchNumber,
 	}
 
-	err = ctx.GetStub().PutState(fmt.Sprintf("PRODUCT-%d", nextProductID), []byte(product))
+	err = ctx.GetStub().PutState(fmt.Sprintf("PRODUCT-%d", nextProductID), []byte(product));
 	if err != nil {
 		return fmt.Errorf("failed to put product on the ledger: %v", err)
 	}
@@ -159,6 +162,9 @@ func (c *ProductDetailsContract) LogProductMovement(ctx contractapi.TransactionC
 		State:     product.State,
 	}
 
+	timestamp, _ := ctx.GetStub().GetTxTimestamp() // Error handling is not required here
+    productHistory.Timestamp = uint64(timestamp.GetSeconds())
+
 	historyKey := fmt.Sprintf("PRODUCT-%d-HISTORY", productID)
 	existingHistoryBytes, err := ctx.GetStub().GetState(historyKey)
 	if err != nil {
@@ -170,6 +176,31 @@ func (c *ProductDetailsContract) LogProductMovement(ctx contractapi.TransactionC
 		err = json.Unmarshal(existingHistoryBytes, &productHistories)
 		if err != nil {
 			return fmt.Errorf("failed to unmarshal product history JSON: %v", err);
-
 }
+
+		// Unmarshal existing product histories
+		err = json.Unmarshal(existingHistoryBytes, &productHistories)
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal product history JSON: %v", err)
+		}
+	}
+
+	// Append the new product history
+	productHistories = append(productHistories, productHistory)
+
+	// Marshal the updated product history
+	updatedHistoryBytes, err := json.Marshal(productHistories)
+	if err != nil {
+		return fmt.Errorf("failed to marshal updated product history JSON: %v", err)
+	}
+
+	// Store the updated history on the ledger
+	err = ctx.GetStub().PutState(historyKey, updatedHistoryBytes)
+	if err != nil {
+		return fmt.Errorf("failed to put updated product history on the ledger: %v", err)
+	}
+
+	return nil
+}
+
 
