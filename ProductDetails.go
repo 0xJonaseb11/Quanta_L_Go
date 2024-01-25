@@ -71,5 +71,24 @@ func (c *ProductDetailsContract) AddProduct(ctx contractapi.TransactionContextIn
 
 	return nil
 
-	
+}
+
+// RetrieveProductDetails retrieves the details of a product
+func (c *ProductDetailsContract) RetrieveProductDetails(ctx contractapi.TransactionContextInterface, productID uint64) (*Product, error) {
+	productBytes, err := ctx.GetStub().GetState(fmt.Sprintf("PRODUCT-%d", productID))
+	if err != nil {
+		return nil, fmt.Errorf("failed to read product from the ledger: %v", err)
+	}
+	if productBytes == nil {
+		return nil, fmt.Errorf("product with ID %d does not exist", productID)
+	}
+
+	product := new(Product)
+	err = json.Unmarshal(productBytes, product)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal product JSON: %v", err)
+	}
+
+	return product, nil
+}
 }
