@@ -10,7 +10,7 @@ type ProductDetailsContract struct {
 	contractapi.Contract
 }
 
-/*
+/**
 *@dev Product() represents the product details
 */
 
@@ -22,7 +22,7 @@ type Product struct {
 	BatchNumber     string `json:"batchNumber"`
 }
 
-/*
+/**
 *@dev ProductHistory() represents the history of a product
 */
 
@@ -33,7 +33,7 @@ type ProductHistory struct {
 	State     ProductState `json:"state"`
 }
 
-/*
+/**
 *@dev ProductState() represents the state of a product
 */
 
@@ -52,7 +52,7 @@ const (
 	PUBLISHING
 )
 
-/*
+/**
 @dev Init() initializes the chaincode
 */
 
@@ -61,7 +61,7 @@ func (c *ProductDetailsContract) Init(ctx contractapi.TransactionContextInterfac
 	return nil
 }
 
-/*
+/**
 *@dev AddProduct() adds a new product
 */
 
@@ -88,7 +88,10 @@ func (c *ProductDetailsContract) AddProduct(ctx contractapi.TransactionContextIn
 
 }
 
-// RetrieveProductDetails() retrieves the details of a product
+/**
+*@dev RetrieveProductDetails() retrieves the details of a product
+*/
+
 func (c *ProductDetailsContract) RetrieveProductDetails(ctx contractapi.TransactionContextInterface, productID uint64) (*Product, error) {
 	productBytes, err := ctx.GetStub().GetState(fmt.Sprintf("PRODUCT-%d", productID))
 	if err != nil {
@@ -107,14 +110,20 @@ func (c *ProductDetailsContract) RetrieveProductDetails(ctx contractapi.Transact
 	return product, nil
 }
 
-// UpdateProductState() updates the state of a product
+/**
+*@dev UpdateProductState() updates the state of a product
+*/
+
 func (c *ProductDetailsContract) UpdateProductState(ctx contractapi.TransactionContextInterface, productID uint64, currentState ProductState) error {
 	product, err := c.RetrieveProductDetails(ctx, productID)
 	if err != nil {
 		return err
 	}
 
-	// check for valid state transitions
+	/**
+	*@dev check for valid state transitions
+    */
+
 	if product.State == PRODUCT_REGISTERED && currentState != PRODUCT_TRANSIT {
 		return fmt.Errorf("invalid state transition")
 	}
@@ -133,7 +142,10 @@ func (c *ProductDetailsContract) UpdateProductState(ctx contractapi.TransactionC
 	return nil
 }
 
-// LogProductMovement logs the movement of a product
+/**
+*@dev LogProductMovement logs the movement of a product
+*/
+
 func (c *ProductDetailsContract) LogProductMovement(ctx contractapi.TransactionContextInterface, productID uint64, newLocation string) error {
 	product, err := c.RetrieveProductDetails(ctx, productID)
 	if err != nil {
